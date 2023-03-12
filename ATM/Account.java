@@ -1,6 +1,4 @@
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -57,31 +55,37 @@ public class Account implements Serializable {
 	}
 
 	public double calcCheckingWithdraw(double amount) {
+		log("Checking withdraw", amount);
 		checkingBalance = (checkingBalance - amount);
 		return checkingBalance;
 	}
 
 	public double calcSavingWithdraw(double amount) {
+		log("Saving withdraw", amount);
 		savingBalance = (savingBalance - amount);
 		return savingBalance;
 	}
 
 	public double calcCheckingDeposit(double amount) {
+		log("Checking deposit", amount);
 		checkingBalance = (checkingBalance + amount);
 		return checkingBalance;
 	}
 
 	public double calcSavingDeposit(double amount) {
+		log("Saving deposit", amount);
 		savingBalance = (savingBalance + amount);
 		return savingBalance;
 	}
 
 	public void calcCheckTransfer(double amount) {
+		log("Checking to Saving", amount);
 		checkingBalance = checkingBalance - amount;
 		savingBalance = savingBalance + amount;
 	}
 
 	public void calcSavingTransfer(double amount) {
+		log("Saving to Checking", amount);
 		savingBalance = savingBalance - amount;
 		checkingBalance = checkingBalance + amount;
 	}
@@ -153,7 +157,7 @@ public class Account implements Serializable {
 		boolean end = false;
 		while (!end) {
 			try {
-				System.out.println("\nCurrent Savings Account Balance: " + moneyFormat.format(savingBalance));
+				System.out.println("\nCurrent Savings Account Balance: " + moneyFormat.format(getSavingBalance()));
 				System.out.print("\nAmount you want to deposit into your Savings Account: ");
 				double amount = input.nextDouble();
 
@@ -236,18 +240,32 @@ public class Account implements Serializable {
 		}
 	}
 
-	public void writeObject(java.io.ObjectOutputStream s) throws IOException {
-		s.writeInt(customerNumber);
-		s.writeInt(pinNumber);
-		s.writeDouble(savingBalance);
-		s.writeDouble(checkingBalance);
+	public void log(String type, double differential){
+		try {
+			FileWriter file = new FileWriter("src/main/resources/log.txt", true);
+			file.write(this.customerNumber + ": " + type + ": " + moneyFormat.format(differential)+"\n");
+			file.close();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
 	}
 
+	/*public void writeObject(java.io.ObjectOutputStream s) {
+		try { //I thought I needed to write these manually, live and learn :)
+			s.writeInt(customerNumber);
+			s.writeInt(pinNumber);
+			s.writeDouble(savingBalance);
+			s.writeDouble(checkingBalance);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+*/
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-		this.customerNumber = in.readInt();
-		this.pinNumber = in.readInt();
-		this.savingBalance = in.readDouble();
-		this.checkingBalance = in.readDouble();
+		in.defaultReadObject();
+		input = new Scanner(System.in);
+		moneyFormat = new DecimalFormat("'$'###,##0.00");
 
 	}
 }

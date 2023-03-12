@@ -13,11 +13,7 @@ public class OptionMenu {
 	HashMap<Integer, Account> data = new HashMap<Integer, Account>();
 
 	public OptionMenu(){
-		try {
 			readAccounts();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	public void getLogin() throws IOException {
@@ -57,7 +53,8 @@ public class OptionMenu {
 				System.out.println(" Type 1 - Checking Account");
 				System.out.println(" Type 2 - Savings Account");
 				System.out.println(" Type 3 - Get Full statement");
-				System.out.println(" Type 4 - Exit");
+				System.out.println(" Type 4 - Get Transaction History");
+				System.out.println(" Type 5 - Exit");
 				System.out.print("\nChoice: ");
 
 				int selection = menuInput.nextInt();
@@ -73,6 +70,9 @@ public class OptionMenu {
 					getStatement(acc);
 					break;
 				case 4:
+					getTransactionHistory(acc);
+					break;
+				case 5:
 					end = true;
 					break;
 				default:
@@ -201,7 +201,7 @@ public class OptionMenu {
 
 	public void mainMenu() throws IOException {
 		//data.put(952141, new Account(952141, 191904, 1000, 5000));
-		//data.put(123, new Account(123, 123, 20000, 50000));
+		data.put(123, new Account(123, 123, 20000, 50000));
 		boolean end = false;
 		while (!end) {
 			try {
@@ -232,17 +232,44 @@ public class OptionMenu {
 		System.exit(0);
 	}
 
+	private void getTransactionHistory(Account acc){
+		try {
+			String line;
+			File file = new File("src/main/resources/log.txt");
+			Scanner reader = new Scanner(file);
+			while(reader.hasNext()){
+				line = reader.nextLine();
+				if(Integer.parseInt(line.split(":")[0]) == acc.getCustomerNumber()){
+					System.out.println(line);
+				}
+
+			}
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private void saveAccounts() throws IOException {
-		FileOutputStream fout = new FileOutputStream("ATM-Machine-Java/src/main/resources/accounts.txt");
+		FileOutputStream fout = new FileOutputStream("src/main/resources/accounts.txt");
 		ObjectOutputStream out = new ObjectOutputStream(fout);
 		out.writeObject(data);
 		out.close();
 		fout.close();
 	}
 
-	private void readAccounts() throws IOException {
-		FileInputStream fout = new FileInputStream("ATM-Machine-Java/src/main/resources/accounts.txt");
-		ObjectInputStream out = new ObjectInputStream(fout);
+	private void readAccounts() {
+		try {
+			FileInputStream fout = new FileInputStream("src/main/resources/accounts.txt");
+			ObjectInputStream out = new ObjectInputStream(fout);
+			this.data = (HashMap<Integer, Account>) out.readObject();
+			out.close();
+			fout.close();
+		}catch(EOFException e){
+
+		}
+		catch (IOException | ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
 
