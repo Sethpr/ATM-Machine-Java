@@ -1,4 +1,5 @@
-import java.io.IOException;
+import javax.swing.text.html.Option;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.InputMismatchException;
@@ -10,6 +11,14 @@ public class OptionMenu {
 	Scanner menuInput = new Scanner(System.in);
 	DecimalFormat moneyFormat = new DecimalFormat("'$'###,##0.00");
 	HashMap<Integer, Account> data = new HashMap<Integer, Account>();
+
+	public OptionMenu(){
+		try {
+			readAccounts();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	public void getLogin() throws IOException {
 		boolean end = false;
@@ -47,7 +56,8 @@ public class OptionMenu {
 				System.out.println("\nSelect the account you want to access: ");
 				System.out.println(" Type 1 - Checking Account");
 				System.out.println(" Type 2 - Savings Account");
-				System.out.println(" Type 3 - Exit");
+				System.out.println(" Type 3 - Get Full statement");
+				System.out.println(" Type 4 - Exit");
 				System.out.print("\nChoice: ");
 
 				int selection = menuInput.nextInt();
@@ -60,6 +70,9 @@ public class OptionMenu {
 					getSaving(acc);
 					break;
 				case 3:
+					getStatement(acc);
+					break;
+				case 4:
 					end = true;
 					break;
 				default:
@@ -70,6 +83,11 @@ public class OptionMenu {
 				menuInput.next();
 			}
 		}
+	}
+
+	private void getStatement(Account acc) {
+		System.out.println("\nChecking Account Balance: " + moneyFormat.format(acc.getCheckingBalance()));
+		System.out.println("\nSavings Account Balance: " + moneyFormat.format(acc.getSavingBalance()));
 	}
 
 	public void getChecking(Account acc) {
@@ -182,8 +200,8 @@ public class OptionMenu {
 	}
 
 	public void mainMenu() throws IOException {
-		data.put(952141, new Account(952141, 191904, 1000, 5000));
-		data.put(123, new Account(123, 123, 20000, 50000));
+		//data.put(952141, new Account(952141, 191904, 1000, 5000));
+		//data.put(123, new Account(123, 123, 20000, 50000));
 		boolean end = false;
 		while (!end) {
 			try {
@@ -210,6 +228,21 @@ public class OptionMenu {
 		}
 		System.out.println("\nThank You for using this ATM.\n");
 		menuInput.close();
+		saveAccounts();
 		System.exit(0);
 	}
+
+	private void saveAccounts() throws IOException {
+		FileOutputStream fout = new FileOutputStream("ATM-Machine-Java/src/main/resources/accounts.txt");
+		ObjectOutputStream out = new ObjectOutputStream(fout);
+		out.writeObject(data);
+		out.close();
+		fout.close();
+	}
+
+	private void readAccounts() throws IOException {
+		FileInputStream fout = new FileInputStream("ATM-Machine-Java/src/main/resources/accounts.txt");
+		ObjectInputStream out = new ObjectInputStream(fout);
+	}
 }
+
