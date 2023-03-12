@@ -1,16 +1,19 @@
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class Account {
+public class Account implements Serializable {
 	// variables
 	private int customerNumber;
 	private int pinNumber;
 	private double checkingBalance = 0;
 	private double savingBalance = 0;
 
-	Scanner input = new Scanner(System.in);
-	DecimalFormat moneyFormat = new DecimalFormat("'$'###,##0.00");
+	transient Scanner input = new Scanner(System.in);
+	transient DecimalFormat moneyFormat = new DecimalFormat("'$'###,##0.00");
 
 	public Account() {
 	}
@@ -231,5 +234,20 @@ public class Account {
 				input.next();
 			}
 		}
+	}
+
+	public void writeObject(java.io.ObjectOutputStream s) throws IOException {
+		s.writeInt(customerNumber);
+		s.writeInt(pinNumber);
+		s.writeDouble(savingBalance);
+		s.writeDouble(checkingBalance);
+	}
+
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		this.customerNumber = in.readInt();
+		this.pinNumber = in.readInt();
+		this.savingBalance = in.readDouble();
+		this.checkingBalance = in.readDouble();
+
 	}
 }
